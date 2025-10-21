@@ -14,11 +14,11 @@ export default function Keyboard({ onKeyPress, letterStatuses }: KeyboardProps) 
     const status = letterStatuses[letter];
     switch (status) {
       case "correct":
-        return "bg-green-600 text-white";
+        return "bg-green-600 text-white hover:bg-green-700";
       case "present":
-        return "bg-yellow-500 text-white";
+        return "bg-yellow-500 text-white hover:bg-yellow-600";
       case "absent":
-        return "bg-gray-600 text-white";
+        return "bg-red-600 text-white hover:bg-red-700 cursor-not-allowed";
       default:
         return "bg-gray-700 text-white hover:bg-gray-600";
     }

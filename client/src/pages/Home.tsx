@@ -18,6 +18,7 @@ export default function Home() {
   const [words, setWords] = useState<string[]>([]);
   const [currentWord, setCurrentWord] = useState<string>("");
   const [currentGuess, setCurrentGuess] = useState<string>("");
+  const [currentPosition, setCurrentPosition] = useState<number>(0);
   const [guesses, setGuesses] = useState<GuessedWord[]>([]);
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
@@ -102,6 +103,7 @@ export default function Home() {
     }
 
     setCurrentGuess("");
+    setCurrentPosition(0);
   }, [currentGuess, currentWord, gameOver, guesses]);
 
   const handleKeyPress = useCallback(
@@ -109,19 +111,36 @@ export default function Home() {
       if (gameOver) return;
 
       if (key === "BACKSPACE") {
-        setCurrentGuess((prev) => prev.slice(0, -1));
+        if (currentPosition > 0) {
+          const newGuess = currentGuess.slice(0, currentPosition - 1);
+          setCurrentGuess(newGuess);
+          setCurrentPosition(currentPosition - 1);
+        }
       } else if (key === "ENTER") {
         handleGuess();
-      } else if (key.length === 1 && currentGuess.length < WORD_LENGTH) {
-        setCurrentGuess((prev) => prev + key.toUpperCase());
+      } else if (key === "ARROWLEFT") {
+        if (currentPosition > 0) {
+          setCurrentPosition(currentPosition - 1);
+        }
+      } else if (key === "ARROWRIGHT") {
+        if (currentPosition < currentGuess.length && currentPosition < WORD_LENGTH - 1) {
+          setCurrentPosition(currentPosition + 1);
+        }
+      } else if (key.length === 1 && currentPosition < WORD_LENGTH) {
+        const newGuess = currentGuess.slice(0, currentPosition) + key.toUpperCase() + currentGuess.slice(currentPosition + 1);
+        setCurrentGuess(newGuess);
+        if (currentPosition < WORD_LENGTH - 1) {
+          setCurrentPosition(currentPosition + 1);
+        }
       }
     },
-    [gameOver, currentGuess, handleGuess]
+    [gameOver, currentGuess, currentPosition, handleGuess]
   );
 
   const handleRestart = useCallback(() => {
     selectNewWord(words);
     setCurrentGuess("");
+    setCurrentPosition(0);
     setGuesses([]);
     setGameOver(false);
     setWon(false);
@@ -139,6 +158,12 @@ export default function Home() {
       } else if (key === "BACKSPACE") {
         e.preventDefault();
         handleKeyPress("BACKSPACE");
+      } else if (key === "ARROWLEFT") {
+        e.preventDefault();
+        handleKeyPress("ARROWLEFT");
+      } else if (key === "ARROWRIGHT") {
+        e.preventDefault();
+        handleKeyPress("ARROWRIGHT");
       } else if (/^[A-Z]$/.test(key)) {
         e.preventDefault();
         handleKeyPress(key);
@@ -168,8 +193,10 @@ export default function Home() {
           <GameBoard
             guesses={guesses}
             currentGuess={currentGuess}
+            currentPosition={currentPosition}
             maxAttempts={MAX_ATTEMPTS}
             wordLength={WORD_LENGTH}
+            onPositionClick={setCurrentPosition}
           />
 
           {/* Keyboard */}
@@ -189,7 +216,7 @@ export default function Home() {
                 A letra está na palavra mas em outra posição
               </p>
               <p>
-                <span className="inline-block bg-gray-600 text-white px-2 py-1 rounded mr-2">X</span>
+                <span className="inline-block bg-red-600 text-white px-2 py-1 rounded mr-2">X</span>
                 A letra não está na palavra
               </p>
             </div>
