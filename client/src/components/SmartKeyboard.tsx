@@ -1,6 +1,6 @@
 interface SmartKeyboardProps {
   onKeyPress: (key: string) => void;
-  letterStatuses: Record<string, "correct" | "present" | "absent" | "empty">;
+  letterStatuses: Record<string, "correct" | "present" | "absent" | "empty">[];
   numBoards?: number;
 }
 
@@ -10,97 +10,108 @@ const KEYBOARD_LAYOUT = [
   ["Z", "X", "C", "V", "B", "N", "M"],
 ];
 
+const getColorClass = (status: "correct" | "present" | "absent" | "empty") => {
+  switch (status) {
+    case "correct":
+      return "bg-green-600";
+    case "present":
+      return "bg-yellow-500";
+    case "absent":
+      return "bg-red-600";
+    default:
+      return "bg-gray-700";
+  }
+};
+
 export default function SmartKeyboard({
   onKeyPress,
   letterStatuses,
   numBoards = 1,
 }: SmartKeyboardProps) {
-  // Dividir as letras do alfabeto entre as telas
-  const getLettersForBoard = (boardIndex: number): Set<string> => {
-    const allLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-    const lettersPerBoard = Math.ceil(26 / numBoards);
-    const startIndex = boardIndex * lettersPerBoard;
-    const endIndex = startIndex + lettersPerBoard;
-    return new Set(allLetters.slice(startIndex, endIndex));
+  const getStatusForBoard = (letter: string, boardIndex: number) => {
+    return letterStatuses[boardIndex]?.[letter] || "empty";
   };
 
-  const getKeyColor = (letter: string, boardIndex: number) => {
-    const status = letterStatuses[letter] || "empty";
-    const boardLetters = getLettersForBoard(boardIndex);
-    
-    // Se a letra não pertence a esta tela, mostrar cinza apagado
-    if (!boardLetters.has(letter)) {
-      return "bg-gray-600 text-gray-400 opacity-40 cursor-not-allowed";
+  const renderKey = (letter: string) => {
+    if (numBoards === 1) {
+      // Modo single - teclado normal
+      const status = letterStatuses[0]?.[letter] || "empty";
+      return (
+        <button
+          key={letter}
+          onClick={() => onKeyPress(letter)}
+          className={`px-3 py-2 rounded font-bold text-sm transition-all text-white hover:opacity-80 ${getColorClass(status)}`}
+        >
+          {letter}
+        </button>
+      );
     }
 
-    switch (status) {
-      case "correct":
-        return "bg-green-600 hover:bg-green-700 text-white";
-      case "present":
-        return "bg-yellow-500 hover:bg-yellow-600 text-white";
-      case "absent":
-        return "bg-red-600 hover:bg-red-700 text-white";
-      default:
-        return "bg-gray-700 hover:bg-gray-600 text-white";
-    }
-  };
+    // Modo múltiplo - dividir a letra em quadrantes
+    const statuses = Array.from({ length: numBoards }).map((_, i) =>
+      getStatusForBoard(letter, i)
+    );
 
-  const renderKeyboardForBoard = (boardIndex: number) => {
-    const boardLetters = getLettersForBoard(boardIndex);
+    // Determinar layout de grid baseado no número de telas
+    let gridCols = 2;
+    let gridRows = 1;
+    if (numBoards === 4) {
+      gridCols = 2;
+      gridRows = 2;
+    } else if (numBoards === 7) {
+      gridCols = 3;
+      gridRows = 3;
+    }
 
     return (
-      <div className="flex flex-col gap-2">
-        {KEYBOARD_LAYOUT.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex gap-1 justify-center">
-            {row.map((letter) => {
-              const isInThisBoard = boardLetters.has(letter);
-              return (
-                <button
-                  key={letter}
-                  onClick={() => isInThisBoard && onKeyPress(letter)}
-                  disabled={!isInThisBoard}
-                  className={`px-3 py-2 rounded font-bold text-sm transition-all ${getKeyColor(letter, boardIndex)}`}
-                >
-                  {letter}
-                </button>
-              );
-            })}
-          </div>
+      <div
+        key={letter}
+        className="relative w-10 h-10 rounded font-bold text-sm text-white cursor-pointer hover:opacity-80 transition-all border border-gray-600 overflow-hidden"
+        onClick={() => onKeyPress(letter)}
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
+          gridTemplateRows: `repeat(${gridRows}, 1fr)`,
+        }}
+      >
+        {/* Dividir a letra em quadrantes por tela */}
+        {statuses.map((status, index) => (
+          <div
+            key={index}
+            className={`flex items-center justify-center ${getColorClass(status)} border border-gray-800`}
+            title={`Tela ${index + 1}: ${status}`}
+          />
         ))}
-        <div className="flex gap-1 justify-center mt-2">
-          <button
-            onClick={() => onKeyPress("BACKSPACE")}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded font-bold text-sm transition-all"
-          >
-            ← Apagar
-          </button>
-          <button
-            onClick={() => onKeyPress("ENTER")}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-sm transition-all"
-          >
-            Enviar →
-          </button>
+
+        {/* Mostrar a letra no centro com sombra */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span className="text-white font-bold drop-shadow-lg text-base">{letter}</span>
         </div>
       </div>
     );
   };
 
-  // Para modo single, retornar teclado normal
-  if (numBoards === 1) {
-    return renderKeyboardForBoard(0);
-  }
-
-  // Para múltiplas telas, mostrar teclados divididos e independentes
   return (
-    <div className="flex flex-col gap-6 w-full">
-      {Array.from({ length: numBoards }).map((_, index) => (
-        <div key={index} className="border-t border-gray-700 pt-4">
-          <h3 className="text-sm font-bold mb-3 text-center text-blue-400">
-            Teclado da Palavra {index + 1}
-          </h3>
-          {renderKeyboardForBoard(index)}
+    <div className="flex flex-col gap-2 w-full max-w-3xl">
+      {KEYBOARD_LAYOUT.map((row, rowIndex) => (
+        <div key={rowIndex} className="flex gap-1 justify-center flex-wrap">
+          {row.map((letter) => renderKey(letter))}
         </div>
       ))}
+      <div className="flex gap-1 justify-center mt-2">
+        <button
+          onClick={() => onKeyPress("BACKSPACE")}
+          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded font-bold text-sm transition-all"
+        >
+          ← Apagar
+        </button>
+        <button
+          onClick={() => onKeyPress("ENTER")}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-sm transition-all"
+        >
+          Enviar →
+        </button>
+      </div>
     </div>
   );
 }

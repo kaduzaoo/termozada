@@ -32,7 +32,10 @@ export default function DuoGame() {
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [currentPosition, setCurrentPosition] = useState<number>(0);
   const [gameOver, setGameOver] = useState(false);
-  const [letterStatuses, setLetterStatuses] = useState<Record<string, LetterStatus>>({});
+  const [letterStatuses, setLetterStatuses] = useState<Record<string, LetterStatus>[]>([
+    {},
+    {},
+  ]);
   const [shake, setShake] = useState(false);
 
   useEffect(() => {
@@ -88,7 +91,7 @@ export default function DuoGame() {
     }
 
     let allWon = true;
-    const newBoards = boards.map((board) => {
+    const newBoards = boards.map((board, boardIndex) => {
       if (board.guesses.length >= MAX_ATTEMPTS || board.won) {
         return board;
       }
@@ -99,15 +102,18 @@ export default function DuoGame() {
         statuses.push(status);
 
         setLetterStatuses((prev) => {
-          const current = prev[guess[i]] || "empty";
+          const newStatuses = [...prev];
+          const boardStatuses = { ...newStatuses[boardIndex] };
+          const current = boardStatuses[guess[i]] || "empty";
           if (status === "correct") {
-            return { ...prev, [guess[i]]: "correct" };
+            boardStatuses[guess[i]] = "correct";
           } else if (status === "present" && current !== "correct") {
-            return { ...prev, [guess[i]]: "present" };
+            boardStatuses[guess[i]] = "present";
           } else if (current === "empty") {
-            return { ...prev, [guess[i]]: status };
+            boardStatuses[guess[i]] = status;
           }
-          return prev;
+          newStatuses[boardIndex] = boardStatuses;
+          return newStatuses;
         });
       }
 
@@ -180,7 +186,7 @@ export default function DuoGame() {
       setCurrentGuess("");
       setCurrentPosition(0);
       setGameOver(false);
-      setLetterStatuses({});
+      setLetterStatuses([{}, {}]);
     }
   }, [words]);
 
