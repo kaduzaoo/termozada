@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
 import GameBoard from "@/components/GameBoard";
 import Keyboard from "@/components/Keyboard";
 import GameOverModal from "@/components/GameOverModal";
 
-const MAX_ATTEMPTS = 6;
+const MAX_ATTEMPTS = 13;
 const WORD_LENGTH = 5;
+const NUM_BOARDS = 7;
 
 type LetterStatus = "correct" | "present" | "absent" | "empty";
 
@@ -14,19 +14,27 @@ interface GuessedWord {
   statuses: LetterStatus[];
 }
 
-export default function Home() {
+interface BoardState {
+  word: string;
+  guesses: GuessedWord[];
+  won: boolean;
+}
+
+export default function SextupleGame() {
   const [words, setWords] = useState<string[]>([]);
-  const [currentWord, setCurrentWord] = useState<string>("");
+  const [boards, setBoards] = useState<BoardState[]>(
+    Array(NUM_BOARDS).fill(null).map(() => ({
+      word: "",
+      guesses: [],
+      won: false,
+    }))
+  );
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [currentPosition, setCurrentPosition] = useState<number>(0);
-  const [guesses, setGuesses] = useState<GuessedWord[]>([]);
   const [gameOver, setGameOver] = useState(false);
-  const [won, setWon] = useState(false);
   const [letterStatuses, setLetterStatuses] = useState<Record<string, LetterStatus>>({});
-
   const [shake, setShake] = useState(false);
 
-  // Load words from file
   useEffect(() => {
     const loadWords = async () => {
       try {
@@ -36,13 +44,18 @@ export default function Home() {
           .split("\n")
           .map((word) => word.trim().toUpperCase())
           .filter((word) => word.length === WORD_LENGTH && word.length > 0);
-        console.log("Loaded words:", wordList.length);
         setWords(wordList);
+        
         if (wordList.length > 0) {
-          const randomIndex = Math.floor(Math.random() * wordList.length);
-          const selectedWord = wordList[randomIndex];
-          console.log("Selected word:", selectedWord);
-          setCurrentWord(selectedWord);
+          const newBoards = Array(NUM_BOARDS).fill(null).map(() => {
+            const randomIndex = Math.floor(Math.random() * wordList.length);
+            return {
+              word: wordList[randomIndex],
+              guesses: [],
+              won: false,
+            };
+          });
+          setBoards(newBoards);
         }
       } catch (error) {
         console.error("Error loading words:", error);
@@ -50,13 +63,6 @@ export default function Home() {
     };
 
     loadWords();
-  }, []);
-
-  const selectNewWord = useCallback((wordList: string[]) => {
-    if (wordList.length > 0) {
-      const randomIndex = Math.floor(Math.random() * wordList.length);
-      setCurrentWord(wordList[randomIndex]);
-    }
   }, []);
 
   const getLetterStatus = (letter: string, position: number, word: string): LetterStatus => {
@@ -75,47 +81,59 @@ export default function Home() {
 
     const guess = currentGuess.toUpperCase();
 
-    // Validate if word exists in the list
     if (!words.includes(guess)) {
-      // Shake effect for invalid word
       setShake(true);
       setTimeout(() => setShake(false), 500);
-      return; // Don't count as a guess
+      return;
     }
 
-    const statuses: LetterStatus[] = [];
+    let allWon = true;
+    const newBoards = boards.map((board) => {
+      if (board.guesses.length >= MAX_ATTEMPTS || board.won) {
+        return board;
+      }
 
-    for (let i = 0; i < WORD_LENGTH; i++) {
-      const status = getLetterStatus(guess[i], i, currentWord);
-      statuses.push(status);
+      const statuses: LetterStatus[] = [];
+      for (let i = 0; i < WORD_LENGTH; i++) {
+        const status = getLetterStatus(guess[i], i, board.word);
+        statuses.push(status);
 
-      // Update letter statuses
-      setLetterStatuses((prev) => {
-        const current = prev[guess[i]] || "empty";
-        if (status === "correct") {
-          return { ...prev, [guess[i]]: "correct" };
-        } else if (status === "present" && current !== "correct") {
-          return { ...prev, [guess[i]]: "present" };
-        } else if (current === "empty") {
-          return { ...prev, [guess[i]]: status };
-        }
-        return prev;
-      });
-    }
+        setLetterStatuses((prev) => {
+          const current = prev[guess[i]] || "empty";
+          if (status === "correct") {
+            return { ...prev, [guess[i]]: "correct" };
+          } else if (status === "present" && current !== "correct") {
+            return { ...prev, [guess[i]]: "present" };
+          } else if (current === "empty") {
+            return { ...prev, [guess[i]]: status };
+          }
+          return prev;
+        });
+      }
 
-    const newGuesses = [...guesses, { word: guess, statuses }];
-    setGuesses(newGuesses);
+      const newGuesses = [...board.guesses, { word: guess, statuses }];
+      const won = guess === board.word;
 
-    if (guess === currentWord) {
-      setWon(true);
-      setGameOver(true);
-    } else if (newGuesses.length >= MAX_ATTEMPTS) {
+      if (!won && newGuesses.length < MAX_ATTEMPTS) {
+        allWon = false;
+      }
+
+      return {
+        ...board,
+        guesses: newGuesses,
+        won,
+      };
+    });
+
+    setBoards(newBoards);
+
+    if (allWon || newBoards.some((b) => b.guesses.length >= MAX_ATTEMPTS && !b.won)) {
       setGameOver(true);
     }
 
     setCurrentGuess("");
     setCurrentPosition(0);
-  }, [currentGuess, currentWord, gameOver, guesses, words]);
+  }, [currentGuess, gameOver, boards, words]);
 
   const handleKeyPress = useCallback(
     (key: string) => {
@@ -149,16 +167,23 @@ export default function Home() {
   );
 
   const handleRestart = useCallback(() => {
-    selectNewWord(words);
-    setCurrentGuess("");
-    setCurrentPosition(0);
-    setGuesses([]);
-    setGameOver(false);
-    setWon(false);
-    setLetterStatuses({});
-  }, [words, selectNewWord]);
+    if (words.length > 0) {
+      const newBoards = Array(NUM_BOARDS).fill(null).map(() => {
+        const randomIndex = Math.floor(Math.random() * words.length);
+        return {
+          word: words[randomIndex],
+          guesses: [],
+          won: false,
+        };
+      });
+      setBoards(newBoards);
+      setCurrentGuess("");
+      setCurrentPosition(0);
+      setGameOver(false);
+      setLetterStatuses({});
+    }
+  }, [words]);
 
-  // Handle physical keyboard input
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toUpperCase();
@@ -186,61 +211,47 @@ export default function Home() {
   }, [handleKeyPress]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-900 text-white">
-      {/* Header */}
+    <div className={`min-h-screen flex flex-col bg-gray-900 text-white transition-all duration-100 ${shake ? 'animate-shake' : ''}`}>
       <header className="border-b border-gray-700 py-4 px-4">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold text-center">TERMO</h1>
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl font-bold text-center">SEXOTUPLETO</h1>
           <p className="text-center text-gray-400 text-sm mt-2">
-            Descubra a palavra certa em {MAX_ATTEMPTS} tentativas
+            Resolva 7 palavras simultaneamente em {MAX_ATTEMPTS} tentativas
           </p>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className={`flex-1 flex flex-col items-center justify-center px-4 py-8 transition-all duration-100 ${shake ? 'animate-shake' : ''}`}>
-        <div className="w-full max-w-2xl">
-          {/* Game Board */}
-          <GameBoard
-            guesses={guesses}
-            currentGuess={currentGuess}
-            currentPosition={currentPosition}
-            maxAttempts={MAX_ATTEMPTS}
-            wordLength={WORD_LENGTH}
-            onPositionClick={setCurrentPosition}
-          />
-
-          {/* Keyboard */}
-          <div className="mt-8">
-            <Keyboard onKeyPress={handleKeyPress} letterStatuses={letterStatuses} />
+      <main className="flex-1 flex flex-col items-center justify-center px-2 py-8 overflow-y-auto">
+        <div className="w-full max-w-7xl">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            {boards.map((board, index) => (
+              <div key={index} className="flex flex-col items-center">
+                <h2 className="text-sm font-bold mb-1">P{index + 1}</h2>
+                <div className="scale-75 origin-top">
+                  <GameBoard
+                    guesses={board.guesses}
+                    currentGuess={currentGuess}
+                    currentPosition={currentPosition}
+                    maxAttempts={MAX_ATTEMPTS}
+                    wordLength={WORD_LENGTH}
+                    onPositionClick={(pos) => setCurrentPosition(pos)}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* Instructions */}
-          {guesses.length === 0 && !gameOver && (
-            <div className="mt-8 bg-gray-800 rounded-lg p-4 text-sm text-gray-300">
-              <p className="mb-2">
-                <span className="inline-block bg-green-600 text-white px-2 py-1 rounded mr-2">G</span>
-                A letra está na posição correta
-              </p>
-              <p className="mb-2">
-                <span className="inline-block bg-yellow-500 text-white px-2 py-1 rounded mr-2">O</span>
-                A letra está na palavra mas em outra posição
-              </p>
-              <p>
-                <span className="inline-block bg-red-600 text-white px-2 py-1 rounded mr-2">X</span>
-                A letra não está na palavra
-              </p>
-            </div>
-          )}
+          <div className="mt-8 flex justify-center">
+            <Keyboard onKeyPress={handleKeyPress} letterStatuses={letterStatuses} />
+          </div>
         </div>
       </main>
 
-      {/* Game Over Modal */}
       <GameOverModal
         isOpen={gameOver}
-        won={won}
-        word={currentWord}
-        attempts={guesses.length}
+        won={boards.every((b) => b.won)}
+        word={boards.map((b) => b.word).join(" / ")}
+        attempts={boards[0].guesses.length}
         maxAttempts={MAX_ATTEMPTS}
         onRestart={handleRestart}
       />

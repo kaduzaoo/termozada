@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
 import GameBoard from "@/components/GameBoard";
 import Keyboard from "@/components/Keyboard";
 import GameOverModal from "@/components/GameOverModal";
@@ -14,7 +13,7 @@ interface GuessedWord {
   statuses: LetterStatus[];
 }
 
-export default function Home() {
+export default function SingleGame() {
   const [words, setWords] = useState<string[]>([]);
   const [currentWord, setCurrentWord] = useState<string>("");
   const [currentGuess, setCurrentGuess] = useState<string>("");
@@ -23,10 +22,8 @@ export default function Home() {
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
   const [letterStatuses, setLetterStatuses] = useState<Record<string, LetterStatus>>({});
-
   const [shake, setShake] = useState(false);
 
-  // Load words from file
   useEffect(() => {
     const loadWords = async () => {
       try {
@@ -36,13 +33,10 @@ export default function Home() {
           .split("\n")
           .map((word) => word.trim().toUpperCase())
           .filter((word) => word.length === WORD_LENGTH && word.length > 0);
-        console.log("Loaded words:", wordList.length);
         setWords(wordList);
         if (wordList.length > 0) {
           const randomIndex = Math.floor(Math.random() * wordList.length);
-          const selectedWord = wordList[randomIndex];
-          console.log("Selected word:", selectedWord);
-          setCurrentWord(selectedWord);
+          setCurrentWord(wordList[randomIndex]);
         }
       } catch (error) {
         console.error("Error loading words:", error);
@@ -75,12 +69,10 @@ export default function Home() {
 
     const guess = currentGuess.toUpperCase();
 
-    // Validate if word exists in the list
     if (!words.includes(guess)) {
-      // Shake effect for invalid word
       setShake(true);
       setTimeout(() => setShake(false), 500);
-      return; // Don't count as a guess
+      return;
     }
 
     const statuses: LetterStatus[] = [];
@@ -89,7 +81,6 @@ export default function Home() {
       const status = getLetterStatus(guess[i], i, currentWord);
       statuses.push(status);
 
-      // Update letter statuses
       setLetterStatuses((prev) => {
         const current = prev[guess[i]] || "empty";
         if (status === "correct") {
@@ -158,7 +149,6 @@ export default function Home() {
     setLetterStatuses({});
   }, [words, selectNewWord]);
 
-  // Handle physical keyboard input
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toUpperCase();
@@ -186,8 +176,7 @@ export default function Home() {
   }, [handleKeyPress]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-900 text-white">
-      {/* Header */}
+    <div className={`min-h-screen flex flex-col bg-gray-900 text-white transition-all duration-100 ${shake ? 'animate-shake' : ''}`}>
       <header className="border-b border-gray-700 py-4 px-4">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-4xl font-bold text-center">TERMO</h1>
@@ -197,10 +186,8 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className={`flex-1 flex flex-col items-center justify-center px-4 py-8 transition-all duration-100 ${shake ? 'animate-shake' : ''}`}>
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8">
         <div className="w-full max-w-2xl">
-          {/* Game Board */}
           <GameBoard
             guesses={guesses}
             currentGuess={currentGuess}
@@ -210,12 +197,10 @@ export default function Home() {
             onPositionClick={setCurrentPosition}
           />
 
-          {/* Keyboard */}
           <div className="mt-8">
             <Keyboard onKeyPress={handleKeyPress} letterStatuses={letterStatuses} />
           </div>
 
-          {/* Instructions */}
           {guesses.length === 0 && !gameOver && (
             <div className="mt-8 bg-gray-800 rounded-lg p-4 text-sm text-gray-300">
               <p className="mb-2">
@@ -235,7 +220,6 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Game Over Modal */}
       <GameOverModal
         isOpen={gameOver}
         won={won}
