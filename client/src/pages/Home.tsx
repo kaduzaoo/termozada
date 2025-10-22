@@ -24,11 +24,13 @@ export default function Home() {
   const [won, setWon] = useState(false);
   const [letterStatuses, setLetterStatuses] = useState<Record<string, LetterStatus>>({});
 
+  const [shake, setShake] = useState(false);
+
   // Load words from file
   useEffect(() => {
     const loadWords = async () => {
       try {
-        const response = await fetch("/palavras.txt");
+        const response = await fetch("/verbos.txt");
         const text = await response.text();
         const wordList = text
           .split("\n")
@@ -72,6 +74,15 @@ export default function Home() {
     if (gameOver) return;
 
     const guess = currentGuess.toUpperCase();
+
+    // Validate if word exists in the list
+    if (!words.includes(guess)) {
+      // Shake effect for invalid word
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return; // Don't count as a guess
+    }
+
     const statuses: LetterStatus[] = [];
 
     for (let i = 0; i < WORD_LENGTH; i++) {
@@ -104,7 +115,7 @@ export default function Home() {
 
     setCurrentGuess("");
     setCurrentPosition(0);
-  }, [currentGuess, currentWord, gameOver, guesses]);
+  }, [currentGuess, currentWord, gameOver, guesses, words]);
 
   const handleKeyPress = useCallback(
     (key: string) => {
@@ -187,7 +198,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+      <main className={`flex-1 flex flex-col items-center justify-center px-4 py-8 transition-all duration-100 ${shake ? 'animate-shake' : ''}`}>
         <div className="w-full max-w-2xl">
           {/* Game Board */}
           <GameBoard
