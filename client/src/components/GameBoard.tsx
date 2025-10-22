@@ -21,13 +21,13 @@ export default function GameBoard({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "correct":
-        return "bg-green-600 border-green-500";
+        return "bg-amber-600 border-amber-500";
       case "present":
         return "bg-yellow-500 border-yellow-400";
       case "absent":
-        return "bg-red-600 border-red-500";
+        return "bg-slate-500 border-slate-400";
       default:
-        return "bg-gray-700 border-gray-600";
+        return "bg-slate-600 border-slate-500";
     }
   };
 
@@ -71,7 +71,7 @@ export default function GameBoard({
             {Array.from({ length: wordLength }).map((_, letterIndex) => (
               <div
                 key={letterIndex}
-                className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded font-bold text-lg border-2 border-gray-600 bg-gray-700"
+                className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded font-bold text-lg border-2 border-slate-500 bg-slate-600"
               />
             ))}
           </div>

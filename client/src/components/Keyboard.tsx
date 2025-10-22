@@ -14,13 +14,13 @@ export default function Keyboard({ onKeyPress, letterStatuses }: KeyboardProps) 
     const status = letterStatuses[letter];
     switch (status) {
       case "correct":
-        return "bg-green-600 text-white hover:bg-green-700";
+        return "bg-amber-600 text-white hover:bg-amber-700";
       case "present":
         return "bg-yellow-500 text-white hover:bg-yellow-600";
       case "absent":
-        return "bg-red-600 text-white hover:bg-red-700 cursor-not-allowed";
+        return "bg-slate-500 text-white hover:bg-slate-600 cursor-not-allowed";
       default:
-        return "bg-gray-700 text-white hover:bg-gray-600";
+        return "bg-slate-600 text-white hover:bg-slate-700";
     }
   };
 
@@ -44,13 +44,13 @@ export default function Keyboard({ onKeyPress, letterStatuses }: KeyboardProps) 
       <div className="flex gap-1 justify-center mt-2">
         <button
           onClick={() => onKeyPress("BACKSPACE")}
-          className="px-4 py-2 rounded font-semibold text-sm bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+          className="px-4 py-2 rounded font-semibold text-sm bg-slate-600 text-white hover:bg-slate-700 transition-colors"
         >
           ← Apagar
         </button>
         <button
           onClick={() => onKeyPress("ENTER")}
-          className="px-4 py-2 rounded font-semibold text-sm bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+          className="px-4 py-2 rounded font-semibold text-sm bg-slate-700 text-white hover:bg-slate-800 transition-colors"
         >
           Enviar →
         </button>

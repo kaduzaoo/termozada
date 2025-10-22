@@ -13,13 +13,13 @@ const KEYBOARD_LAYOUT = [
 const getColorClass = (status: "correct" | "present" | "absent" | "empty") => {
   switch (status) {
     case "correct":
-      return "bg-green-600";
+      return "bg-amber-600";
     case "present":
       return "bg-yellow-500";
     case "absent":
-      return "bg-red-600";
+      return "bg-slate-500";
     default:
-      return "bg-gray-700";
+      return "bg-slate-600";
   }
 };
 

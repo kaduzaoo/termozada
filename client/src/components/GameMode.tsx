@@ -21,12 +21,12 @@ export default function GameMode() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-slate-800">
       {/* Hamburger Menu */}
       <div className="fixed top-4 left-4 z-50">
         <button
           onClick={() => setShowMenu(!showMenu)}
-          className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
         >
           <svg
             className="w-6 h-6 text-white"
@@ -45,7 +45,7 @@ export default function GameMode() {
 
         {/* Menu Dropdown */}
         {showMenu && (
-          <div className="absolute top-12 left-0 bg-gray-800 rounded-lg shadow-lg py-2 min-w-48">
+          <div className="absolute top-12 left-0 bg-slate-700 rounded-lg shadow-lg py-2 min-w-48">
             {modes.map((m) => (
               <button
                 key={m.id}
@@ -55,8 +55,8 @@ export default function GameMode() {
                 }}
                 className={`w-full text-left px-4 py-2 transition-colors ${
                   mode === m.id
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-300 hover:bg-gray-700"
+                    ? "bg-slate-600 text-white"
+                    : "text-slate-300 hover:bg-slate-600"
                 }`}
               >
                 <span className="mr-2">{m.icon}</span>

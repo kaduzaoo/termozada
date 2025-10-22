@@ -176,8 +176,8 @@ export default function SingleGame() {
   }, [handleKeyPress]);
 
   return (
-    <div className={`min-h-screen flex flex-col bg-gray-900 text-white transition-all duration-100 ${shake ? 'animate-shake' : ''}`}>
-      <header className="border-b border-gray-700 py-4 px-4">
+    <div className={`min-h-screen flex flex-col bg-slate-800 text-white transition-all duration-100 ${shake ? 'animate-shake' : ''}`}>
+      <header className="border-b border-slate-700 py-4 px-4">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-4xl font-bold text-center">TERMO</h1>
           <p className="text-center text-gray-400 text-sm mt-2">
@@ -202,9 +202,9 @@ export default function SingleGame() {
           </div>
 
           {guesses.length === 0 && !gameOver && (
-            <div className="mt-8 bg-gray-800 rounded-lg p-4 text-sm text-gray-300">
+            <div className="mt-8 bg-slate-700 rounded-lg p-4 text-sm text-slate-300">
               <p className="mb-2">
-                <span className="inline-block bg-green-600 text-white px-2 py-1 rounded mr-2">G</span>
+                <span className="inline-block bg-amber-600 text-white px-2 py-1 rounded mr-2">G</span>
                 A letra está na posição correta
               </p>
               <p className="mb-2">
@@ -212,7 +212,7 @@ export default function SingleGame() {
                 A letra está na palavra mas em outra posição
               </p>
               <p>
-                <span className="inline-block bg-red-600 text-white px-2 py-1 rounded mr-2">X</span>
+                <span className="inline-block bg-slate-500 text-white px-2 py-1 rounded mr-2">X</span>
                 A letra não está na palavra
               </p>
             </div>

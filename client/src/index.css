@@ -134,6 +134,26 @@
 }
 
 @layer utilities {
+  /* Cores suaves para o jogo Termo */
+  .termo-correct {
+    @apply bg-amber-600;
+  }
+  .termo-present {
+    @apply bg-yellow-500;
+  }
+  .termo-absent {
+    @apply bg-slate-500;
+  }
+  .termo-empty {
+    @apply bg-slate-600;
+  }
+  .termo-bg {
+    @apply bg-slate-800;
+  }
+  .termo-header {
+    @apply border-slate-700;
+  }
+
   @keyframes shake {
     0%, 100% {
       transform: translateX(0);
