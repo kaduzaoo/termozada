@@ -1,15 +1,15 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, Router } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import GameMode from "./components/GameMode";
 
-function Router() {
+function AppRouter() {
   return (
     <Switch>
-      <Route path={"\\"} component={GameMode} />
+      <Route path={"/"} component={GameMode} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -23,19 +23,24 @@ function Router() {
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
 function App() {
+  const base = import.meta.env.BASE_URL || "/";
+  
   return (
     <ErrorBoundary>
       <ThemeProvider
         defaultTheme="light"
         // switchable
       >
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <Router base={base}>
+          <TooltipProvider>
+            <Toaster />
+            <AppRouter />
+          </TooltipProvider>
+        </Router>
       </ThemeProvider>
     </ErrorBoundary>
   );
 }
 
 export default App;
+
