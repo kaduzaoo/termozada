@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, Router } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import GameMode from "./components/GameMode";
@@ -23,16 +23,30 @@ function AppRouter() {
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
 function App() {
+  // Get the base path from the script tag or use Vite's BASE_URL
+  const getBasePath = () => {
+    // Try to get from meta tag first
+    const metaBase = document.querySelector('meta[name="base"]')?.getAttribute('content');
+    if (metaBase) return metaBase;
+    
+    // Fall back to import.meta.env.BASE_URL
+    return import.meta.env.BASE_URL || '/';
+  };
+
+  const basePath = getBasePath();
+
   return (
     <ErrorBoundary>
       <ThemeProvider
         defaultTheme="light"
         // switchable
       >
-        <TooltipProvider>
-          <Toaster />
-          <AppRouter />
-        </TooltipProvider>
+        <Router base={basePath}>
+          <TooltipProvider>
+            <Toaster />
+            <AppRouter />
+          </TooltipProvider>
+        </Router>
       </ThemeProvider>
     </ErrorBoundary>
   );
