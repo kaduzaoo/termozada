@@ -222,7 +222,7 @@ export default function QuartetGame() {
     <div className={`min-h-screen flex flex-col bg-slate-800 text-white transition-all duration-100 ${shake ? 'animate-shake' : ''}`}>
       <header className="border-b border-slate-700 py-4 px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-center">TERMO DA RAÇA - QUARTETO</h1>
+          <h1 className="text-4xl font-bold text-center">QUARTETO</h1>
           <p className="text-center text-gray-400 text-sm mt-2">
             Resolva 4 palavras simultaneamente em {MAX_ATTEMPTS} tentativas
           </p>
