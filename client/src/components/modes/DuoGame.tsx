@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import GameBoard from "@/components/GameBoard";
-import Keyboard from "@/components/Keyboard";
+import SmartKeyboard from "@/components/SmartKeyboard";
 import GameOverModal from "@/components/GameOverModal";
 
 const MAX_ATTEMPTS = 7;
@@ -240,7 +240,7 @@ export default function DuoGame() {
           </div>
 
           <div className="mt-8 flex justify-center">
-            <Keyboard onKeyPress={handleKeyPress} letterStatuses={letterStatuses} />
+            <SmartKeyboard onKeyPress={handleKeyPress} letterStatuses={letterStatuses} numBoards={NUM_BOARDS} />
           </div>
         </div>
       </main>

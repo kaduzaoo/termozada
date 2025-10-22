@@ -1,11 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import GameBoard from "@/components/GameBoard";
-import SmartKeyboard from "@/components/SmartKeyboard";
+import Keyboard from "@/components/Keyboard";
 import GameOverModal from "@/components/GameOverModal";
 
-const MAX_ATTEMPTS = 9;
 const WORD_LENGTH = 5;
-const NUM_BOARDS = 4;
 
 type LetterStatus = "correct" | "present" | "absent" | "empty";
 
@@ -14,24 +12,14 @@ interface GuessedWord {
   statuses: LetterStatus[];
 }
 
-interface BoardState {
-  word: string;
-  guesses: GuessedWord[];
-  won: boolean;
-}
-
-export default function QuartetGame() {
+export default function InfiniteGame() {
   const [words, setWords] = useState<string[]>([]);
-  const [boards, setBoards] = useState<BoardState[]>(
-    Array(NUM_BOARDS).fill(null).map(() => ({
-      word: "",
-      guesses: [],
-      won: false,
-    }))
-  );
+  const [currentWord, setCurrentWord] = useState<string>("");
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [currentPosition, setCurrentPosition] = useState<number>(0);
+  const [guesses, setGuesses] = useState<GuessedWord[]>([]);
   const [gameOver, setGameOver] = useState(false);
+  const [won, setWon] = useState(false);
   const [letterStatuses, setLetterStatuses] = useState<Record<string, LetterStatus>>({});
   const [shake, setShake] = useState(false);
 
@@ -45,17 +33,9 @@ export default function QuartetGame() {
           .map((word) => word.trim().toUpperCase())
           .filter((word) => word.length === WORD_LENGTH && word.length > 0);
         setWords(wordList);
-        
         if (wordList.length > 0) {
-          const newBoards = Array(NUM_BOARDS).fill(null).map(() => {
-            const randomIndex = Math.floor(Math.random() * wordList.length);
-            return {
-              word: wordList[randomIndex],
-              guesses: [],
-              won: false,
-            };
-          });
-          setBoards(newBoards);
+          const randomIndex = Math.floor(Math.random() * wordList.length);
+          setCurrentWord(wordList[randomIndex]);
         }
       } catch (error) {
         console.error("Error loading words:", error);
@@ -63,6 +43,13 @@ export default function QuartetGame() {
     };
 
     loadWords();
+  }, []);
+
+  const selectNewWord = useCallback((wordList: string[]) => {
+    if (wordList.length > 0) {
+      const randomIndex = Math.floor(Math.random() * wordList.length);
+      setCurrentWord(wordList[randomIndex]);
+    }
   }, []);
 
   const getLetterStatus = (letter: string, position: number, word: string): LetterStatus => {
@@ -77,7 +64,6 @@ export default function QuartetGame() {
 
   const handleGuess = useCallback(() => {
     if (currentGuess.length !== WORD_LENGTH) return;
-    if (gameOver) return;
 
     const guess = currentGuess.toUpperCase();
 
@@ -87,58 +73,39 @@ export default function QuartetGame() {
       return;
     }
 
-    let allWon = true;
-    const newBoards = boards.map((board) => {
-      if (board.guesses.length >= MAX_ATTEMPTS || board.won) {
-        return board;
-      }
+    const statuses: LetterStatus[] = [];
 
-      const statuses: LetterStatus[] = [];
-      for (let i = 0; i < WORD_LENGTH; i++) {
-        const status = getLetterStatus(guess[i], i, board.word);
-        statuses.push(status);
+    for (let i = 0; i < WORD_LENGTH; i++) {
+      const status = getLetterStatus(guess[i], i, currentWord);
+      statuses.push(status);
 
-        setLetterStatuses((prev) => {
-          const current = prev[guess[i]] || "empty";
-          if (status === "correct") {
-            return { ...prev, [guess[i]]: "correct" };
-          } else if (status === "present" && current !== "correct") {
-            return { ...prev, [guess[i]]: "present" };
-          } else if (current === "empty") {
-            return { ...prev, [guess[i]]: status };
-          }
-          return prev;
-        });
-      }
+      setLetterStatuses((prev) => {
+        const current = prev[guess[i]] || "empty";
+        if (status === "correct") {
+          return { ...prev, [guess[i]]: "correct" };
+        } else if (status === "present" && current !== "correct") {
+          return { ...prev, [guess[i]]: "present" };
+        } else if (current === "empty") {
+          return { ...prev, [guess[i]]: status };
+        }
+        return prev;
+      });
+    }
 
-      const newGuesses = [...board.guesses, { word: guess, statuses }];
-      const won = guess === board.word;
+    const newGuesses = [...guesses, { word: guess, statuses }];
+    setGuesses(newGuesses);
 
-      if (!won && newGuesses.length < MAX_ATTEMPTS) {
-        allWon = false;
-      }
-
-      return {
-        ...board,
-        guesses: newGuesses,
-        won,
-      };
-    });
-
-    setBoards(newBoards);
-
-    if (allWon || newBoards.some((b) => b.guesses.length >= MAX_ATTEMPTS && !b.won)) {
+    if (guess === currentWord) {
+      setWon(true);
       setGameOver(true);
     }
 
     setCurrentGuess("");
     setCurrentPosition(0);
-  }, [currentGuess, gameOver, boards, words]);
+  }, [currentGuess, currentWord, guesses, words]);
 
   const handleKeyPress = useCallback(
     (key: string) => {
-      if (gameOver) return;
-
       if (key === "BACKSPACE") {
         if (currentPosition > 0) {
           const newGuess = currentGuess.slice(0, currentPosition - 1);
@@ -163,26 +130,18 @@ export default function QuartetGame() {
         }
       }
     },
-    [gameOver, currentGuess, currentPosition, handleGuess]
+    [currentGuess, currentPosition, handleGuess]
   );
 
   const handleRestart = useCallback(() => {
-    if (words.length > 0) {
-      const newBoards = Array(NUM_BOARDS).fill(null).map(() => {
-        const randomIndex = Math.floor(Math.random() * words.length);
-        return {
-          word: words[randomIndex],
-          guesses: [],
-          won: false,
-        };
-      });
-      setBoards(newBoards);
-      setCurrentGuess("");
-      setCurrentPosition(0);
-      setGameOver(false);
-      setLetterStatuses({});
-    }
-  }, [words]);
+    selectNewWord(words);
+    setCurrentGuess("");
+    setCurrentPosition(0);
+    setGuesses([]);
+    setGameOver(false);
+    setWon(false);
+    setLetterStatuses({});
+  }, [words, selectNewWord]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -213,44 +172,57 @@ export default function QuartetGame() {
   return (
     <div className={`min-h-screen flex flex-col bg-gray-900 text-white transition-all duration-100 ${shake ? 'animate-shake' : ''}`}>
       <header className="border-b border-gray-700 py-4 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-center">QUARTETO</h1>
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-4xl font-bold text-center">INFINITO</h1>
           <p className="text-center text-gray-400 text-sm mt-2">
-            Resolva 4 palavras simultaneamente em {MAX_ATTEMPTS} tentativas
+            Jogue sem limites de tentativas
+          </p>
+          <p className="text-center text-gray-500 text-xs mt-1">
+            Palavras acertadas: {guesses.filter((g) => g.word === currentWord).length}
           </p>
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8">
-        <div className="w-full max-w-7xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {boards.map((board, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <h2 className="text-lg font-bold mb-2">P{index + 1}</h2>
-                <GameBoard
-                  guesses={board.guesses}
-                  currentGuess={currentGuess}
-                  currentPosition={currentPosition}
-                  maxAttempts={MAX_ATTEMPTS}
-                  wordLength={WORD_LENGTH}
-                  onPositionClick={(pos) => setCurrentPosition(pos)}
-                />
-              </div>
-            ))}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 overflow-y-auto">
+        <div className="w-full max-w-2xl">
+          <GameBoard
+            guesses={guesses}
+            currentGuess={currentGuess}
+            currentPosition={currentPosition}
+            maxAttempts={Math.max(guesses.length + 2, 6)}
+            wordLength={WORD_LENGTH}
+            onPositionClick={setCurrentPosition}
+          />
+
+          <div className="mt-8">
+            <Keyboard onKeyPress={handleKeyPress} letterStatuses={letterStatuses} />
           </div>
 
-          <div className="mt-8 flex justify-center">
-            <SmartKeyboard onKeyPress={handleKeyPress} letterStatuses={letterStatuses} numBoards={NUM_BOARDS} />
-          </div>
+          {guesses.length === 0 && !gameOver && (
+            <div className="mt-8 bg-gray-800 rounded-lg p-4 text-sm text-gray-300">
+              <p className="mb-2">
+                <span className="inline-block bg-green-600 text-white px-2 py-1 rounded mr-2">G</span>
+                A letra está na posição correta
+              </p>
+              <p className="mb-2">
+                <span className="inline-block bg-yellow-500 text-white px-2 py-1 rounded mr-2">O</span>
+                A letra está na palavra mas em outra posição
+              </p>
+              <p>
+                <span className="inline-block bg-red-600 text-white px-2 py-1 rounded mr-2">X</span>
+                A letra não está na palavra
+              </p>
+            </div>
+          )}
         </div>
       </main>
 
       <GameOverModal
         isOpen={gameOver}
-        won={boards.every((b) => b.won)}
-        word={boards.map((b) => b.word).join(" / ")}
-        attempts={boards[0].guesses.length}
-        maxAttempts={MAX_ATTEMPTS}
+        won={won}
+        word={currentWord}
+        attempts={guesses.length}
+        maxAttempts={guesses.length}
         onRestart={handleRestart}
       />
     </div>

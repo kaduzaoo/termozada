@@ -4,8 +4,9 @@ import SingleGame from "./modes/SingleGame";
 import DuoGame from "./modes/DuoGame";
 import QuartetGame from "./modes/QuartetGame";
 import SextupleGame from "./modes/SextupleGame";
+import InfiniteGame from "./modes/InfiniteGame";
 
-type GameModeType = "single" | "duo" | "quartet" | "sextuple";
+type GameModeType = "single" | "duo" | "quartet" | "sextuple" | "infinite";
 
 export default function GameMode() {
   const [mode, setMode] = useState<GameModeType>("single");
@@ -16,6 +17,7 @@ export default function GameMode() {
     { id: "duo", label: "Dueto", icon: "👥" },
     { id: "quartet", label: "Quarteto", icon: "👫" },
     { id: "sextuple", label: "Sexotupleto", icon: "👨‍👩‍👧‍👦" },
+    { id: "infinite", label: "Infinito", icon: "♾️" },
   ];
 
   return (
@@ -71,6 +73,7 @@ export default function GameMode() {
         {mode === "duo" && <DuoGame />}
         {mode === "quartet" && <QuartetGame />}
         {mode === "sextuple" && <SextupleGame />}
+        {mode === "infinite" && <InfiniteGame />}
       </div>
     </div>
   );

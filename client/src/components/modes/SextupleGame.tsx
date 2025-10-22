@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import GameBoard from "@/components/GameBoard";
-import Keyboard from "@/components/Keyboard";
+import SmartKeyboard from "@/components/SmartKeyboard";
 import GameOverModal from "@/components/GameOverModal";
 
-const MAX_ATTEMPTS = 13;
+const MAX_ATTEMPTS = 12;
 const WORD_LENGTH = 5;
 const NUM_BOARDS = 7;
 
@@ -242,7 +242,7 @@ export default function SextupleGame() {
           </div>
 
           <div className="mt-8 flex justify-center">
-            <Keyboard onKeyPress={handleKeyPress} letterStatuses={letterStatuses} />
+            <SmartKeyboard onKeyPress={handleKeyPress} letterStatuses={letterStatuses} numBoards={NUM_BOARDS} />
           </div>
         </div>
       </main>
