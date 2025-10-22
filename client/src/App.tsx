@@ -24,6 +24,7 @@ function AppRouter() {
 
 function App() {
   const base = import.meta.env.BASE_URL || "/";
+  console.log('BASE_URL:', import.meta.env.BASE_URL, 'Wouter base:', base);
   
   return (
     <ErrorBoundary>
