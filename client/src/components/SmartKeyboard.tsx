@@ -15,17 +15,22 @@ export default function SmartKeyboard({
   letterStatuses,
   numBoards = 1,
 }: SmartKeyboardProps) {
+  // Dividir as letras do alfabeto entre as telas
+  const getLettersForBoard = (boardIndex: number): Set<string> => {
+    const allLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const lettersPerBoard = Math.ceil(26 / numBoards);
+    const startIndex = boardIndex * lettersPerBoard;
+    const endIndex = startIndex + lettersPerBoard;
+    return new Set(allLetters.slice(startIndex, endIndex));
+  };
+
   const getKeyColor = (letter: string, boardIndex: number) => {
     const status = letterStatuses[letter] || "empty";
+    const boardLetters = getLettersForBoard(boardIndex);
     
-    // Dividir letras entre telas
-    const lettersPerBoard = 26 / numBoards;
-    const letterIndex = letter.charCodeAt(0) - 65; // A=0, Z=25
-    const assignedBoard = Math.floor(letterIndex / lettersPerBoard);
-    
-    // Se a letra não foi testada nesta tela, mostrar cinza claro (não testado)
-    if (assignedBoard !== boardIndex && status === "empty") {
-      return "bg-gray-600 text-gray-400 opacity-50";
+    // Se a letra não pertence a esta tela, mostrar cinza apagado
+    if (!boardLetters.has(letter)) {
+      return "bg-gray-600 text-gray-400 opacity-40 cursor-not-allowed";
     }
 
     switch (status) {
@@ -40,20 +45,26 @@ export default function SmartKeyboard({
     }
   };
 
-  const renderKeyboard = (boardIndex: number = 0) => {
+  const renderKeyboardForBoard = (boardIndex: number) => {
+    const boardLetters = getLettersForBoard(boardIndex);
+
     return (
       <div className="flex flex-col gap-2">
         {KEYBOARD_LAYOUT.map((row, rowIndex) => (
           <div key={rowIndex} className="flex gap-1 justify-center">
-            {row.map((letter) => (
-              <button
-                key={letter}
-                onClick={() => onKeyPress(letter)}
-                className={`px-3 py-2 rounded font-bold text-sm transition-all ${getKeyColor(letter, boardIndex)}`}
-              >
-                {letter}
-              </button>
-            ))}
+            {row.map((letter) => {
+              const isInThisBoard = boardLetters.has(letter);
+              return (
+                <button
+                  key={letter}
+                  onClick={() => isInThisBoard && onKeyPress(letter)}
+                  disabled={!isInThisBoard}
+                  className={`px-3 py-2 rounded font-bold text-sm transition-all ${getKeyColor(letter, boardIndex)}`}
+                >
+                  {letter}
+                </button>
+              );
+            })}
           </div>
         ))}
         <div className="flex gap-1 justify-center mt-2">
@@ -76,16 +87,18 @@ export default function SmartKeyboard({
 
   // Para modo single, retornar teclado normal
   if (numBoards === 1) {
-    return renderKeyboard(0);
+    return renderKeyboardForBoard(0);
   }
 
-  // Para múltiplas telas, mostrar teclados divididos
+  // Para múltiplas telas, mostrar teclados divididos e independentes
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6 w-full">
       {Array.from({ length: numBoards }).map((_, index) => (
         <div key={index} className="border-t border-gray-700 pt-4">
-          <h3 className="text-xs text-gray-400 mb-2 text-center">Tela {index + 1}</h3>
-          {renderKeyboard(index)}
+          <h3 className="text-sm font-bold mb-3 text-center text-blue-400">
+            Teclado da Palavra {index + 1}
+          </h3>
+          {renderKeyboardForBoard(index)}
         </div>
       ))}
     </div>
