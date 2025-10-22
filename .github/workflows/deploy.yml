@@ -45,6 +45,12 @@ jobs:
         run: pnpm install
 
       - name: Build
+        env:
+          VITE_APP_ID: proj_termozada
+          VITE_APP_TITLE: "Termo PT"
+          VITE_APP_LOGO: "https://placehold.co/40x40/3b82f6/ffffff?text=T"
+          VITE_ANALYTICS_ENDPOINT: "https://analytics.example.com"
+          VITE_ANALYTICS_WEBSITE_ID: "analytics_termozada"
         run: pnpm build
 
       - name: Setup Pages
