@@ -30,7 +30,7 @@ export default function Home() {
   useEffect(() => {
     const loadWords = async () => {
       try {
-        const response = await fetch("/verbos.txt");
+        const response = await fetch(import.meta.env.BASE_URL + "verbos.txt");
         const text = await response.text();
         const wordList = text
           .split("\n")

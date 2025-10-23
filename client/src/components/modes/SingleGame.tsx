@@ -27,7 +27,8 @@ export default function SingleGame() {
   useEffect(() => {
     const loadWords = async () => {
       try {
-        const response = await fetch("/verbos.txt");
+        const basePath = import.meta.env.BASE_URL || '/';
+        const response = await fetch(basePath + "verbos.txt");
         const text = await response.text();
         const wordList = text
           .split("\n")
