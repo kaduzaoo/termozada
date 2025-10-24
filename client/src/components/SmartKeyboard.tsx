@@ -1,3 +1,5 @@
+import { Backspace } from "lucide-react";
+
 interface SmartKeyboardProps {
   onKeyPress: (key: string) => void;
   letterStatuses: Record<string, "correct" | "present" | "absent" | "empty">[];
@@ -6,8 +8,8 @@ interface SmartKeyboardProps {
 
 const KEYBOARD_LAYOUT = [
   ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
-  ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-  ["Z", "X", "C", "V", "B", "N", "M"],
+  ["A", "S", "D", "F", "G", "H", "J", "K", "L", "BACKSPACE"],
+  ["Z", "X", "C", "V", "B", "N", "M", "ENTER"],
 ];
 
 const getColorClass = (status: "correct" | "present" | "absent" | "empty") => {
@@ -36,6 +38,30 @@ export default function SmartKeyboard({
     if (numBoards === 1) {
       // Modo single - teclado normal
       const status = letterStatuses[0]?.[letter] || "empty";
+
+      if (letter === "BACKSPACE") {
+        return (
+          <button
+            key={letter}
+            onClick={() => onKeyPress("BACKSPACE")}
+            className="p-3 rounded font-semibold text-sm transition-colors bg-slate-600 text-white hover:bg-slate-700 w-12 h-12 flex items-center justify-center"
+          >
+            <Backspace className="w-5 h-5" />
+          </button>
+        );
+      }
+      if (letter === "ENTER") {
+        return (
+          <button
+            key={letter}
+            onClick={() => onKeyPress("ENTER")}
+            className="px-4 py-2 rounded font-semibold text-sm transition-colors bg-teal-600 text-white hover:bg-teal-700 flex-grow"
+          >
+            ENVIAR
+          </button>
+        );
+      }
+
       return (
         <button
           key={letter}
@@ -98,20 +124,6 @@ export default function SmartKeyboard({
           {row.map((letter) => renderKey(letter))}
         </div>
       ))}
-      <div className="flex gap-1 justify-center mt-2">
-        <button
-          onClick={() => onKeyPress("BACKSPACE")}
-          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded font-bold text-sm transition-all"
-        >
-          ← Apagar
-        </button>
-        <button
-          onClick={() => onKeyPress("ENTER")}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-sm transition-all"
-        >
-          Enviar →
-        </button>
-      </div>
     </div>
   );
 }
