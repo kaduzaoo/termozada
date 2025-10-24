@@ -1,3 +1,5 @@
+import { Backspace } from "lucide-react";
+
 interface KeyboardProps {
   onKeyPress: (key: string) => void;
   letterStatuses: Record<string, "correct" | "present" | "absent" | "empty">;
@@ -6,8 +8,8 @@ interface KeyboardProps {
 export default function Keyboard({ onKeyPress, letterStatuses }: KeyboardProps) {
   const rows = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
-    ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-    ["Z", "X", "C", "V", "B", "N", "M"],
+    ["A", "S", "D", "F", "G", "H", "J", "K", "L", "BACKSPACE"],
+    ["Z", "X", "C", "V", "B", "N", "M", "ENTER"],
   ];
 
   const getKeyColor = (letter: string) => {
@@ -26,38 +28,41 @@ export default function Keyboard({ onKeyPress, letterStatuses }: KeyboardProps) 
 
   return (
     <div className="flex flex-col gap-2">
-      {rows.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex gap-1 justify-center flex-wrap">
-          {row.map((letter) => (
-            <button
-              key={letter}
-              onClick={() => onKeyPress(letter)}
-              className={`px-3 py-2 rounded font-semibold text-sm transition-colors ${getKeyColor(letter)}`}
-            >
-              {letter}
-            </button>
-          ))}
-          
-          {/* Add special keys to the last row */}
-          {rowIndex === rows.length - 1 && (
-            <>
+          {row.map((letter) => {
+            if (letter === "BACKSPACE") {
+              return (
+                <button
+                  key={letter}
+                  onClick={() => onKeyPress("BACKSPACE")}
+                  className="p-3 rounded font-semibold text-sm transition-colors bg-slate-600 text-white hover:bg-slate-700 w-12 h-12 flex items-center justify-center"
+                >
+                  <Backspace className="w-5 h-5" />
+                </button>
+              );
+            }
+            if (letter === "ENTER") {
+              return (
+                <button
+                  key={letter}
+                  onClick={() => onKeyPress("ENTER")}
+                  className="px-4 py-2 rounded font-semibold text-sm transition-colors bg-teal-600 text-white hover:bg-teal-700 flex-grow"
+                >
+                  ENVIAR
+                </button>
+              );
+            }
+            return (
               <button
-                onClick={() => onKeyPress("BACKSPACE")}
-                className="px-4 py-2 rounded font-semibold text-sm bg-slate-600 text-white hover:bg-slate-700 transition-colors"
+                key={letter}
+                onClick={() => onKeyPress(letter)}
+                className={`px-3 py-2 rounded font-semibold text-sm transition-colors ${getKeyColor(letter)}`}
               >
-                ← Apagar
+                {letter}
               </button>
-              <button
-                onClick={() => onKeyPress("ENTER")}
-                className="px-4 py-2 rounded font-semibold text-sm bg-teal-600 text-white hover:bg-teal-700 transition-colors"
-              >
-                Enviar →
-              </button>
-            </>
-          )}
+            );
+          })}
         </div>
       ))}
     </div>
   );
 }
-
