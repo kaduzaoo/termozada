@@ -14,11 +14,11 @@ export default function Keyboard({ onKeyPress, letterStatuses }: KeyboardProps) 
     const status = letterStatuses[letter];
     switch (status) {
       case "correct":
-        return "bg-amber-600 text-white hover:bg-amber-700";
+        return "bg-green-600 text-white hover:bg-green-700";
       case "present":
         return "bg-yellow-500 text-white hover:bg-yellow-600";
       case "absent":
-        return "bg-slate-500 text-white hover:bg-slate-600 cursor-not-allowed";
+        return "bg-black text-white hover:bg-gray-800 cursor-not-allowed";
       default:
         return "bg-slate-600 text-white hover:bg-slate-700";
     }
@@ -27,7 +27,7 @@ export default function Keyboard({ onKeyPress, letterStatuses }: KeyboardProps) 
   return (
     <div className="flex flex-col gap-2">
       {rows.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex gap-1 justify-center">
+        <div key={rowIndex} className="flex gap-1 justify-center flex-wrap">
           {row.map((letter) => (
             <button
               key={letter}
@@ -37,24 +37,26 @@ export default function Keyboard({ onKeyPress, letterStatuses }: KeyboardProps) 
               {letter}
             </button>
           ))}
+          
+          {/* Add special keys to the last row */}
+          {rowIndex === rows.length - 1 && (
+            <>
+              <button
+                onClick={() => onKeyPress("BACKSPACE")}
+                className="px-4 py-2 rounded font-semibold text-sm bg-slate-600 text-white hover:bg-slate-700 transition-colors"
+              >
+                ← Apagar
+              </button>
+              <button
+                onClick={() => onKeyPress("ENTER")}
+                className="px-4 py-2 rounded font-semibold text-sm bg-teal-600 text-white hover:bg-teal-700 transition-colors"
+              >
+                Enviar →
+              </button>
+            </>
+          )}
         </div>
       ))}
-
-      {/* Special keys row */}
-      <div className="flex gap-1 justify-center mt-2">
-        <button
-          onClick={() => onKeyPress("BACKSPACE")}
-          className="px-4 py-2 rounded font-semibold text-sm bg-slate-600 text-white hover:bg-slate-700 transition-colors"
-        >
-          ← Apagar
-        </button>
-        <button
-          onClick={() => onKeyPress("ENTER")}
-          className="px-4 py-2 rounded font-semibold text-sm bg-slate-700 text-white hover:bg-slate-800 transition-colors"
-        >
-          Enviar →
-        </button>
-      </div>
     </div>
   );
 }
