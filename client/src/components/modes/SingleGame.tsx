@@ -229,7 +229,7 @@ export default function SingleGame() {
           {guesses.length === 0 && !gameOver && (
             <div className="mt-8 bg-slate-700 rounded-lg p-4 text-sm text-slate-300">
               <p className="mb-2">
-                <span className="inline-block bg-amber-600 text-white px-2 py-1 rounded mr-2">G</span>
+                <span className="inline-block bg-emerald-600 text-white px-2 py-1 rounded mr-2">G</span>
                 A letra está na posição correta
               </p>
               <p className="mb-2">
