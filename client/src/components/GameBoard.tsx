@@ -43,7 +43,7 @@ export default function GameBoard({
           return (
             <div
               key={index}
-              onClick={() => isCurrentGuess && !statuses[index] && onPositionClick(index)}
+              onClick={() => isCurrentGuess && onPositionClick(index)}
               className={`w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded font-bold text-lg sm:text-xl text-white border-2 transition-all duration-300 cursor-pointer ${bgColor} ${
                 isActive ? "ring-2 ring-blue-400" : ""
               }`}
