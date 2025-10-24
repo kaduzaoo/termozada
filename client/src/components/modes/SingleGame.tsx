@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from "react";
 import GameBoard from "@/components/GameBoard";
 import Keyboard from "@/components/Keyboard";
 import GameOverModal from "@/components/GameOverModal";
-import { normalizeWord } from "@/lib/utils";
 
 const MAX_ATTEMPTS = 6;
 const WORD_LENGTH = 5;
@@ -33,7 +32,7 @@ export default function SingleGame() {
         const text = await response.text();
         const wordList = text
           .split("\n")
-          .map((word) => normalizeWord(word.trim()))
+          .map((word) => word.trim().toUpperCase())
           .filter((word) => word.length === WORD_LENGTH && word.length > 0);
         setWords(wordList);
         if (wordList.length > 0) {
@@ -69,10 +68,8 @@ export default function SingleGame() {
     if (currentGuess.length !== WORD_LENGTH) return;
     if (gameOver) return;
 
-    // Normaliza o palpite do usuário antes de qualquer validação/comparação
-    const guess = normalizeWord(currentGuess);
+    const guess = currentGuess.toUpperCase();
 
-    // A lista 'words' já está normalizada, então a comparação é direta
     if (!words.includes(guess)) {
       setShake(true);
       setTimeout(() => setShake(false), 500);
@@ -81,7 +78,6 @@ export default function SingleGame() {
 
     const statuses: LetterStatus[] = [];
 
-    // A palavra secreta (currentWord) e o palpite (guess) estão normalizados
     for (let i = 0; i < WORD_LENGTH; i++) {
       const status = getLetterStatus(guess[i], i, currentWord);
       statuses.push(status);
@@ -118,21 +114,11 @@ export default function SingleGame() {
       if (gameOver) return;
 
       if (key === "BACKSPACE") {
-        let newGuess = currentGuess;
-        let newPosition = currentPosition;
-        
-        if (currentGuess[currentPosition]) {
-          // Se a posição atual tem uma letra, apaga e mantém a posição
-          newGuess = currentGuess.slice(0, currentPosition) + currentGuess.slice(currentPosition + 1);
-        } else if (currentPosition > 0) {
-          // Se a posição está vazia, apaga a anterior e recua
-          newGuess = currentGuess.slice(0, currentPosition - 1) + currentGuess.slice(currentPosition);
-          newPosition = currentPosition - 1;
+        if (currentPosition > 0) {
+          const newGuess = currentGuess.slice(0, currentPosition - 1);
+          setCurrentGuess(newGuess);
+          setCurrentPosition(currentPosition - 1);
         }
-
-        setCurrentGuess(newGuess);
-        setCurrentPosition(newPosition);
-
       } else if (key === "ENTER") {
         handleGuess();
       } else if (key === "ARROWLEFT") {
@@ -143,20 +129,10 @@ export default function SingleGame() {
         if (currentPosition < WORD_LENGTH - 1) {
           setCurrentPosition(currentPosition + 1);
         }
-      } else if (key.length === 1 && /^[A-ZÇÉÁÍÓÚÃÕÀÈÌÒÙÂÊÎÔÛ]$/i.test(key)) {
-        // Insere a letra na posição atual
-        let newGuess = currentGuess.slice(0, currentPosition) + key.toUpperCase() + currentGuess.slice(currentPosition + 1);
+      } else if (key.length === 1 && currentPosition < WORD_LENGTH) {
+        const newGuess = currentGuess.slice(0, currentPosition) + key.toUpperCase() + currentGuess.slice(currentPosition + 1);
         setCurrentGuess(newGuess);
-
-        // Avança para a próxima posição vazia ou para a próxima posição se a palavra não estiver completa
-        let nextPosition = currentPosition + 1;
-        while (nextPosition < WORD_LENGTH && newGuess[nextPosition]) {
-          nextPosition++;
-        }
-
-        if (nextPosition < WORD_LENGTH) {
-          setCurrentPosition(nextPosition);
-        } else if (currentPosition < WORD_LENGTH - 1) {
+        if (currentPosition < WORD_LENGTH - 1) {
           setCurrentPosition(currentPosition + 1);
         }
       }
@@ -190,7 +166,7 @@ export default function SingleGame() {
       } else if (key === "ARROWRIGHT") {
         e.preventDefault();
         handleKeyPress("ARROWRIGHT");
-      } else if (/^[A-ZÇÉÁÍÓÚÃÕÀÈÌÒÙÂÊÎÔÛ]$/i.test(key)) {
+      } else if (/^[A-Z]$/.test(key)) {
         e.preventDefault();
         handleKeyPress(key);
       }
