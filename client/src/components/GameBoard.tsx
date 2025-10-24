@@ -21,7 +21,7 @@ export default function GameBoard({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "correct":
-        return "bg-amber-600 border-amber-500";
+        return "bg-emerald-600 border-emerald-500";
       case "present":
         return "bg-yellow-500 border-yellow-400";
       case "absent":

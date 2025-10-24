@@ -136,7 +136,7 @@
 @layer utilities {
   /* Cores suaves para o jogo Termo */
   .termo-correct {
-    @apply bg-amber-600;
+    @apply bg-emerald-600;
   }
   .termo-present {
     @apply bg-yellow-500;
