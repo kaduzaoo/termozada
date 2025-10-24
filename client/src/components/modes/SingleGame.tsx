@@ -114,22 +114,11 @@ export default function SingleGame() {
       if (gameOver) return;
 
       if (key === "BACKSPACE") {
-        let newGuess = currentGuess;
-        let newPosition = currentPosition;
-        
-        if (currentGuess[currentPosition]) {
-          // Se a posição atual tem uma letra, apaga e mantém a posição
-          newGuess = currentGuess.slice(0, currentPosition) + currentGuess.slice(currentPosition + 1);
-        } else if (currentPosition > 0) {
-          // Se a posição está vazia, apaga a anterior e recua
-          newGuess = currentGuess.slice(0, currentPosition - 1) + currentGuess.slice(currentPosition);
-          newPosition = currentPosition - 1;
+        if (currentPosition > 0) {
+          const newGuess = currentGuess.slice(0, currentPosition - 1);
+          setCurrentGuess(newGuess);
+          setCurrentPosition(currentPosition - 1);
         }
-
-        setCurrentGuess(newGuess);
-        setCurrentPosition(newPosition);
-
-      } else if (key === "ENTER") {
       } else if (key === "ENTER") {
         handleGuess();
       } else if (key === "ARROWLEFT") {
@@ -140,23 +129,12 @@ export default function SingleGame() {
         if (currentPosition < WORD_LENGTH - 1) {
           setCurrentPosition(currentPosition + 1);
         }
-      } else if (key.length === 1 && /^[A-Z]$/.test(key)) {
-        // Insere a letra na posição atual
-        let newGuess = currentGuess.slice(0, currentPosition) + key.toUpperCase() + currentGuess.slice(currentPosition + 1);
+      } else if (key.length === 1 && currentPosition < WORD_LENGTH) {
+        const newGuess = currentGuess.slice(0, currentPosition) + key.toUpperCase() + currentGuess.slice(currentPosition + 1);
         setCurrentGuess(newGuess);
-
-        // Avança para a próxima posição vazia ou para a próxima posição se a palavra não estiver completa
-        let nextPosition = currentPosition + 1;
-        while (nextPosition < WORD_LENGTH && newGuess[nextPosition]) {
-          nextPosition++;
-        }
-
-        if (nextPosition < WORD_LENGTH) {
-          setCurrentPosition(nextPosition);
-        } else if (currentPosition < WORD_LENGTH - 1) {
+        if (currentPosition < WORD_LENGTH - 1) {
           setCurrentPosition(currentPosition + 1);
         }
-      }
       }
     },
     [gameOver, currentGuess, currentPosition, handleGuess]
@@ -179,23 +157,10 @@ export default function SingleGame() {
       if (key === "ENTER") {
         e.preventDefault();
         handleKeyPress("ENTER");
-      if (key === "BACKSPACE") {
-        let newGuess = currentGuess;
-        let newPosition = currentPosition;
-        
-        if (currentGuess[currentPosition]) {
-          // Se a posição atual tem uma letra, apaga e mantém a posição
-          newGuess = currentGuess.slice(0, currentPosition) + currentGuess.slice(currentPosition + 1);
-        } else if (currentPosition > 0) {
-          // Se a posição está vazia, apaga a anterior e recua
-          newGuess = currentGuess.slice(0, currentPosition - 1) + currentGuess.slice(currentPosition);
-          newPosition = currentPosition - 1;
-        }
-
-        setCurrentGuess(newGuess);
-        setCurrentPosition(newPosition);
-
-      } else if (key === "ENTER") {
+      } else if (key === "BACKSPACE") {
+        e.preventDefault();
+        handleKeyPress("BACKSPACE");
+      } else if (key === "ARROWLEFT") {
         e.preventDefault();
         handleKeyPress("ARROWLEFT");
       } else if (key === "ARROWRIGHT") {
