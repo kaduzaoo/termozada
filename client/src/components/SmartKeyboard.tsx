@@ -42,7 +42,7 @@ export default function SmartKeyboard({
           <button
             key={letter}
             onClick={() => onKeyPress("BACKSPACE")}
-            className="px-3 py-2 rounded font-semibold text-sm transition-colors bg-slate-600 text-white hover:bg-slate-700 flex-grow"
+            className="px-3 py-2 rounded font-semibold text-sm transition-colors bg-slate-600 text-white hover:bg-slate-700 w-12"
           >
             ←
           </button>
@@ -53,7 +53,7 @@ export default function SmartKeyboard({
           <button
             key={letter}
             onClick={() => onKeyPress("ENTER")}
-            className="px-4 py-2 rounded font-semibold text-sm transition-colors bg-teal-600 text-white hover:bg-teal-700 flex-grow"
+            className="px-4 py-2 rounded font-semibold text-sm transition-colors bg-teal-600 text-white hover:bg-teal-700 w-24"
           >
             ENVIAR
           </button>
