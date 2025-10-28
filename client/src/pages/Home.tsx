@@ -123,7 +123,7 @@ export default function Home() {
 
       if (key === "BACKSPACE") {
         if (currentPosition > 0) {
-          const newGuess = currentGuess.slice(0, currentPosition - 1);
+          const newGuess = currentGuess.slice(0, currentPosition - 1) + currentGuess.slice(currentPosition);
           setCurrentGuess(newGuess);
           setCurrentPosition(currentPosition - 1);
         }
@@ -140,6 +140,12 @@ export default function Home() {
       } else if (key.length === 1 && currentPosition < WORD_LENGTH) {
         const newGuess = currentGuess.slice(0, currentPosition) + key.toUpperCase() + currentGuess.slice(currentPosition + 1);
         setCurrentGuess(newGuess);
+        // Auto-advance only if we're at the end of the current input
+        if (currentPosition === currentGuess.length) {
+          if (currentPosition < WORD_LENGTH - 1) {
+            setCurrentPosition(currentPosition + 1);
+          }
+        }
       }
     },
     [gameOver, currentGuess, currentPosition, handleGuess]
@@ -244,4 +250,3 @@ export default function Home() {
     </div>
   );
 }
-
