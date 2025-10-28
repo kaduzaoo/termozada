@@ -142,8 +142,11 @@ export default function Home() {
           setUserSelectedPosition(true);
         }
       } else if (key.length === 1 && currentPosition < WORD_LENGTH) {
-        // Insert the letter at the current position
-        const newGuess = currentGuess.slice(0, currentPosition) + key.toUpperCase() + currentGuess.slice(currentPosition + 1);
+        // Build the new guess with the letter at the current position
+        const guessArray = currentGuess.split('');
+        guessArray[currentPosition] = key.toUpperCase();
+        const newGuess = guessArray.join('');
+        
         setCurrentGuess(newGuess);
         
         // Auto-advance only if user hasn't manually selected a position
