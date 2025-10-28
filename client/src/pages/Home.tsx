@@ -140,9 +140,6 @@ export default function Home() {
       } else if (key.length === 1 && currentPosition < WORD_LENGTH) {
         const newGuess = currentGuess.slice(0, currentPosition) + key.toUpperCase() + currentGuess.slice(currentPosition + 1);
         setCurrentGuess(newGuess);
-        if (currentPosition < WORD_LENGTH - 1) {
-          setCurrentPosition(currentPosition + 1);
-        }
       }
     },
     [gameOver, currentGuess, currentPosition, handleGuess]
