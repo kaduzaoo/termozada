@@ -143,7 +143,11 @@ export default function Home() {
         }
       } else if (key.length === 1 && currentPosition < WORD_LENGTH) {
         // Build the new guess with the letter at the current position
+        // Ensure the array has the correct size by padding with spaces
         const guessArray = currentGuess.split('');
+        while (guessArray.length < WORD_LENGTH) {
+          guessArray.push(' ');
+        }
         guessArray[currentPosition] = key.toUpperCase();
         const newGuess = guessArray.join('');
         
