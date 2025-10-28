@@ -25,6 +25,7 @@ export default function Home() {
   const [letterStatuses, setLetterStatuses] = useState<Record<string, LetterStatus>>({});
 
   const [shake, setShake] = useState(false);
+  const [userSelectedPosition, setUserSelectedPosition] = useState<boolean>(false);
 
   // Load words from file
   useEffect(() => {
@@ -115,6 +116,7 @@ export default function Home() {
 
     setCurrentGuess("");
     setCurrentPosition(0);
+    setUserSelectedPosition(false);
   }, [currentGuess, currentWord, gameOver, guesses, words]);
 
   const handleKeyPress = useCallback(
@@ -132,24 +134,35 @@ export default function Home() {
       } else if (key === "ARROWLEFT") {
         if (currentPosition > 0) {
           setCurrentPosition(currentPosition - 1);
+          setUserSelectedPosition(true);
         }
       } else if (key === "ARROWRIGHT") {
         if (currentPosition < WORD_LENGTH - 1) {
           setCurrentPosition(currentPosition + 1);
+          setUserSelectedPosition(true);
         }
       } else if (key.length === 1 && currentPosition < WORD_LENGTH) {
         const newGuess = currentGuess.slice(0, currentPosition) + key.toUpperCase() + currentGuess.slice(currentPosition + 1);
         setCurrentGuess(newGuess);
-        // Auto-advance only if we're at the end of the current input
-        if (currentPosition === currentGuess.length) {
+        
+        // Auto-advance only if user hasn't manually selected a position
+        if (!userSelectedPosition) {
           if (currentPosition < WORD_LENGTH - 1) {
             setCurrentPosition(currentPosition + 1);
           }
+        } else {
+          // User selected a position, so don't auto-advance
+          setUserSelectedPosition(false);
         }
       }
     },
-    [gameOver, currentGuess, currentPosition, handleGuess]
+    [gameOver, currentGuess, currentPosition, userSelectedPosition, handleGuess]
   );
+
+  const handlePositionClick = useCallback((position: number) => {
+    setCurrentPosition(position);
+    setUserSelectedPosition(true);
+  }, []);
 
   const handleRestart = useCallback(() => {
     selectNewWord(words);
@@ -159,6 +172,7 @@ export default function Home() {
     setGameOver(false);
     setWon(false);
     setLetterStatuses({});
+    setUserSelectedPosition(false);
   }, [words, selectNewWord]);
 
   // Handle physical keyboard input
@@ -210,7 +224,7 @@ export default function Home() {
             currentPosition={currentPosition}
             maxAttempts={MAX_ATTEMPTS}
             wordLength={WORD_LENGTH}
-            onPositionClick={setCurrentPosition}
+            onPositionClick={handlePositionClick}
           />
 
           {/* Keyboard */}
