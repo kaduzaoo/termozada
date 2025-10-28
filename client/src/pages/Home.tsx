@@ -142,16 +142,18 @@ export default function Home() {
           setUserSelectedPosition(true);
         }
       } else if (key.length === 1 && currentPosition < WORD_LENGTH) {
+        // Insert the letter at the current position
         const newGuess = currentGuess.slice(0, currentPosition) + key.toUpperCase() + currentGuess.slice(currentPosition + 1);
         setCurrentGuess(newGuess);
         
         // Auto-advance only if user hasn't manually selected a position
         if (!userSelectedPosition) {
+          // Auto-advance to the next position if not at the end
           if (currentPosition < WORD_LENGTH - 1) {
             setCurrentPosition(currentPosition + 1);
           }
         } else {
-          // User selected a position, so don't auto-advance
+          // User selected a position manually, so clear the flag but don't advance
           setUserSelectedPosition(false);
         }
       }
