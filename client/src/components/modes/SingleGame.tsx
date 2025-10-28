@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import GameBoard from "@/components/GameBoard";
 import Keyboard from "@/components/Keyboard";
+import { normalizeWord } from "@/lib/utils";
 import GameOverModal from "@/components/GameOverModal";
 
 const MAX_ATTEMPTS = 6;
@@ -32,7 +33,7 @@ export default function SingleGame() {
         const text = await response.text();
         const wordList = text
           .split("\n")
-          .map((word) => word.trim().toUpperCase())
+          .map((word) => normalizeWord(word))
           .filter((word) => word.length === WORD_LENGTH && word.length > 0);
         setWords(wordList);
         if (wordList.length > 0) {
@@ -68,9 +69,9 @@ export default function SingleGame() {
     if (currentGuess.length !== WORD_LENGTH) return;
     if (gameOver) return;
 
-    const guess = currentGuess.toUpperCase();
+    const guess = normalizeWord(currentGuess);
 
-    if (!words.includes(guess)) {
+    if (!words.includes(guess) && guess !== currentWord) {
       setShake(true);
       setTimeout(() => setShake(false), 500);
       return;
@@ -139,7 +140,7 @@ export default function SingleGame() {
         if (currentPosition < WORD_LENGTH - 1) {
           setCurrentPosition(currentPosition + 1);
         }
-      } else if (key.length === 1 && /^[A-Z]$/i.test(key)) {
+      } else if (key.length === 1 && /^[A-ZÇÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛ]$/i.test(key)) {
         // Insere a letra na posição atual
         let newGuess = currentGuess.slice(0, currentPosition) + key.toUpperCase() + currentGuess.slice(currentPosition + 1);
         setCurrentGuess(newGuess);
@@ -186,7 +187,7 @@ export default function SingleGame() {
       } else if (key === "ARROWRIGHT") {
         e.preventDefault();
         handleKeyPress("ARROWRIGHT");
-      } else if (/^[A-Z]$/i.test(key)) {
+      } else if (/^[A-ZÇÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛ]$/i.test(key)) {
         e.preventDefault();
         handleKeyPress(key);
       }
