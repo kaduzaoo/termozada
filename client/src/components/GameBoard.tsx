@@ -35,7 +35,7 @@ export default function GameBoard({
     return (
       <div key={`row-${rowIndex}`} className="flex gap-2 justify-center mb-2">
         {Array.from({ length: wordLength }).map((_, index) => {
-          const letter = word[index] || "";
+          const letter = word[index] === " " ? "" : word[index] || "";
           const status = statuses[index] || "empty";
           const bgColor = getStatusColor(status);
           const isActive = isCurrentGuess && index === currentPosition;

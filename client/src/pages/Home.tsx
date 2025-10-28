@@ -125,7 +125,11 @@ export default function Home() {
 
       if (key === "BACKSPACE") {
         if (currentPosition > 0) {
-          const newGuess = currentGuess.slice(0, currentPosition - 1) + currentGuess.slice(currentPosition);
+          // Substitui a letra na posição anterior por um espaço em branco
+          const guessArray = currentGuess.split('');
+          guessArray[currentPosition - 1] = ' '; 
+          const newGuess = guessArray.join('');
+          
           setCurrentGuess(newGuess);
           setCurrentPosition(currentPosition - 1);
         }
