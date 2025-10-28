@@ -17,7 +17,7 @@ interface GuessedWord {
 export default function Home() {
   const [words, setWords] = useState<string[]>([]);
   const [currentWord, setCurrentWord] = useState<string>("");
-  const [currentGuess, setCurrentGuess] = useState<string>("");
+  const [currentGuess, setCurrentGuess] = useState<string>("     "); // Inicializa com 5 espaços em branco
   const [currentPosition, setCurrentPosition] = useState<number>(0);
   const [guesses, setGuesses] = useState<GuessedWord[]>([]);
   const [gameOver, setGameOver] = useState(false);
@@ -114,7 +114,7 @@ export default function Home() {
       setGameOver(true);
     }
 
-    setCurrentGuess("");
+    setCurrentGuess("     "); // Reinicializa com 5 espaços em branco
     setCurrentPosition(0);
     setUserSelectedPosition(false);
   }, [currentGuess, currentWord, gameOver, guesses, words]);
@@ -175,7 +175,7 @@ export default function Home() {
 
   const handleRestart = useCallback(() => {
     selectNewWord(words);
-    setCurrentGuess("");
+    setCurrentGuess("     "); // Reinicializa com 5 espaços em branco
     setCurrentPosition(0);
     setGuesses([]);
     setGameOver(false);
